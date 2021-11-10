@@ -26,11 +26,11 @@ class PositionalEmbedding(nn.Module):
 
 
 class TransformerEmbedding(nn.Module):
-    def __init__(self, hidden_size, vocab_size):
+    def __init__(self, hidden_size, vocab_size, padding_id):
         super().__init__()
         self.hidden_size = hidden_size
         self.vocab_size = vocab_size
-        self.embedding = nn.Embedding(vocab_size, hidden_size)
+        self.embedding = nn.Embedding(vocab_size, hidden_size, padding_idx=padding_id)
 
     def forward(self, x):
         return self.embedding(x) * math.sqrt(self.hidden_size)
