@@ -13,7 +13,8 @@ class TransformerConfig:
                 layer_norm_eps: float = 1e-5,
                 src_padding_id: int = 1,
                 tgt_padding_id: int = 1,
-                norm_first: bool = False) -> None:
+                norm_first: bool = False,
+                max_sequence_length: int = 1024) -> None:
 
         self.src_vocab_size = src_vocab_size
         self.tgt_vocab_size = tgt_vocab_size
@@ -28,3 +29,4 @@ class TransformerConfig:
         self.src_padding_id = src_padding_id
         self.tgt_padding_id = tgt_padding_id
         self.norm_first = norm_first
+        self.max_sequence_length = max_sequence_length
