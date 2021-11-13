@@ -40,12 +40,12 @@ class Transformer(nn.Module):
             raise RuntimeError('The hidden size of src and tgt must be equal')
 
         memory = self.encoder(src, src_mask=src_mask, src_key_padding_mask=src_key_padding_mask)
-        output = self.decoder.forward(tgt, 
-                                      memory=memory,
-                                      tgt_mask=tgt_mask,
-                                      memory_mask=memory_mask,
-                                      tgt_key_padding_mask=tgt_key_padding_mask,
-                                      memory_key_padding_mask=memory_key_padding_mask)
+        output = self.decoder(tgt, 
+                              memory=memory,
+                              tgt_mask=tgt_mask,
+                              memory_mask=memory_mask,
+                              tgt_key_padding_mask=tgt_key_padding_mask,
+                              memory_key_padding_mask=memory_key_padding_mask)
         return output
 
     def _reset_parameters(self):
