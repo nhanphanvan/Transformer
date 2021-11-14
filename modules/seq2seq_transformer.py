@@ -29,7 +29,18 @@ class Seq2SeqTransformer(nn.Module):
                 src_key_padding_mask: Optional[Tensor] = None,
                 tgt_key_padding_mask: Optional[Tensor] = None,
                 memory_key_padding_mask: Optional[Tensor] = None) -> Tensor:
-        
+        """
+            N: batch size, S: source sequence length, T: target sequence length, E: feature number
+            src: (N, S, E)
+            tgt : (N, T, E)
+            memory: (N, S, E)
+            src_mask: (S, S)
+            tgt_mask: (T, T)
+            memory_mask: (T, S)
+            src_key_padding_mask: (N, S)
+            tgt_key_padding_mask: (N, T)
+            memory_key_padding_mask: (N, S)
+        """       
         src_emb = self.positional_embedding(self.src_embedding(src))
         tgt_emb = self.positional_embedding(self.tgt_embedding(tgt))
         outputs = self.transformer(src_emb, tgt_emb, src_mask, tgt_mask, None, src_key_padding_mask, tgt_key_padding_mask, memory_key_padding_mask)
@@ -54,4 +65,4 @@ class Seq2SeqTransformer(nn.Module):
 
         tgt_emb = self.positional_embedding(self.tgt_embedding(tgt))
         return self.transformer.decoder(tgt_emb, memory, tgt_mask, memory_mask, tgt_key_padding_mask, memory_key_padding_mask)
-        
+

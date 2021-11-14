@@ -33,7 +33,18 @@ class Transformer(nn.Module):
                 src_key_padding_mask: Optional[Tensor] = None,
                 tgt_key_padding_mask: Optional[Tensor] = None,
                 memory_key_padding_mask: Optional[Tensor] = None) -> Tensor:
-
+        """
+            N: batch size, S: source sequence length, T: target sequence length, E: feature number
+            src: (N, S, E)
+            tgt : (N, T, E)
+            memory: (N, S, E)
+            src_mask: (S, S)
+            tgt_mask: (T, T)
+            memory_mask: (T, S)
+            src_key_padding_mask: (N, S)
+            tgt_key_padding_mask: (N, T)
+            memory_key_padding_mask: (N, S)
+        """       
         if src.shape[0] != tgt.shape[0]:
             raise RuntimeError('The batch size of src and tgt must be equal')
         if src.shape[-1] != tgt.shape[-1]:

@@ -113,7 +113,7 @@ class SelfAttention(nn.Module):
 
         if attention_mask is not None:
             new_attention_mask = torch.zeros_like(attention_mask, dtype=torch.float)
-            new_attention_mask.masked_fill(attention_mask, float('-inf'))
+            new_attention_mask = new_attention_mask.masked_fill(attention_mask, float('-inf'))
             attention_mask = new_attention_mask
         
         attention_output = self._dot_product_attention(q, k, v, attention_mask)
