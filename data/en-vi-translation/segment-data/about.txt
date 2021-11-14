@@ -1,0 +1,3 @@
+Train dataset: train.en - segment_train.vi
+Dev dataset: tst2012.en - segment_tst2012.vi
+Test dataset: tst2013.en - segment_tst2013.vi
