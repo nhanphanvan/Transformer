@@ -14,7 +14,9 @@ class TransformerConfig:
                 src_padding_id: int = 1,
                 tgt_padding_id: int = 1,
                 norm_first: bool = False,
-                max_sequence_length: int = 1024) -> None:
+                max_sequence_length: int = 1024,
+                bert_embedding: bool = False,
+                type_vocab_size: int = 1) -> None:
 
         self.src_vocab_size = src_vocab_size
         self.tgt_vocab_size = tgt_vocab_size
@@ -30,3 +32,5 @@ class TransformerConfig:
         self.tgt_padding_id = tgt_padding_id
         self.norm_first = norm_first
         self.max_sequence_length = max_sequence_length
+        self.bert_embedding = bert_embedding
+        self.type_vocab_size = type_vocab_size
