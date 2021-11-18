@@ -57,14 +57,16 @@ class BertEmbedding(nn.Module):
     def forward(self, x, token_type_ids=None):
         input_shape = x.size()
         seq_length = input_shape[1]
-        if hasattr(self, "token_type_ids"):
-            buffered_token_type_ids = self.token_type_ids[:, :seq_length]
-            buffered_token_type_ids_expanded = buffered_token_type_ids.expand(input_shape[0], seq_length)
-            token_type_ids = buffered_token_type_ids_expanded
-        else:
-            token_type_ids = torch.zeros(input_shape, dtype=torch.long, device=self.position_ids.device)
+        position_ids = self.position_ids[:, : seq_length]
+        if token_type_ids is None:
+            if hasattr(self, "token_type_ids"):
+                buffered_token_type_ids = self.token_type_ids[:, :seq_length]
+                buffered_token_type_ids_expanded = buffered_token_type_ids.expand(input_shape[0], seq_length)
+                token_type_ids = buffered_token_type_ids_expanded
+            else:
+                token_type_ids = torch.zeros(input_shape, dtype=torch.long, device=self.position_ids.device)
         
-        embedding = self.word_embedding(x) + self.position_embedding(x) + self.token_type_embedding(token_type_ids)
+        embedding = self.word_embedding(x) + self.position_embedding(position_ids) + self.token_type_embedding(token_type_ids)
         embedding = self.norm(embedding)
         embedding = self.dropout(embedding)
         return embedding
