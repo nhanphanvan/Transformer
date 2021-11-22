@@ -34,6 +34,7 @@ class Seq2SeqTransformer(nn.Module):
                 tgt: Tensor,
                 src_mask: Optional[Tensor] = None,
                 tgt_mask: Optional[Tensor] = None,
+                memory_mask: Optional[Tensor] = None,
                 src_key_padding_mask: Optional[Tensor] = None,
                 tgt_key_padding_mask: Optional[Tensor] = None,
                 memory_key_padding_mask: Optional[Tensor] = None) -> Tensor:
@@ -55,7 +56,7 @@ class Seq2SeqTransformer(nn.Module):
         else:
             src_emb = self.positional_embedding(self.src_embedding(src))
             tgt_emb = self.positional_embedding(self.tgt_embedding(tgt))
-        outputs = self.transformer(src_emb, tgt_emb, src_mask, tgt_mask, None, src_key_padding_mask, tgt_key_padding_mask, memory_key_padding_mask)
+        outputs = self.transformer(src_emb, tgt_emb, src_mask, tgt_mask, memory_mask, src_key_padding_mask, tgt_key_padding_mask, memory_key_padding_mask)
         
         return self.generator(outputs)
 
