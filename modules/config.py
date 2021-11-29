@@ -16,7 +16,9 @@ class TransformerConfig:
                 norm_first: bool = False,
                 max_sequence_length: int = 1024,
                 bert_embedding: bool = False,
-                type_vocab_size: int = 1) -> None:
+                type_vocab_size: int = 1,
+                device=None,
+                dtype=None) -> None:
 
         self.src_vocab_size = src_vocab_size
         self.tgt_vocab_size = tgt_vocab_size
@@ -34,3 +36,5 @@ class TransformerConfig:
         self.max_sequence_length = max_sequence_length
         self.bert_embedding = bert_embedding
         self.type_vocab_size = type_vocab_size
+        self.device = device
+        self.dtype = dtype

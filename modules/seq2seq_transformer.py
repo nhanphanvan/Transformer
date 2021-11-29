@@ -15,18 +15,19 @@ from transformer import Transformer
 class Seq2SeqTransformer(nn.Module):
     def __init__(self, config: TransformerConfig):
         super().__init__()
+        kwargs = {'device': config.device, 'dtype': config.dtype}
         self.bert_embedding = config.bert_embedding
         self.transformer = Transformer(config=config)
-        self.generator = nn.Linear(config.hidden_size, config.tgt_vocab_size)
+        self.generator = nn.Linear(config.hidden_size, config.tgt_vocab_size, **kwargs)
         if self.bert_embedding:
             self.src_embedding = BertEmbedding(config.hidden_size, config.src_vocab_size, config.src_padding_id, config.max_sequence_length, 
-                                               config.layer_norm_eps, config.dropout, config.type_vocab_size)
+                                               config.layer_norm_eps, config.dropout, config.type_vocab_size, **kwargs)
             self.tgt_embedding = BertEmbedding(config.hidden_size, config.tgt_vocab_size, config.tgt_padding_id, config.max_sequence_length,
-                                               config.layer_norm_eps, config.dropout, config.type_vocab_size)
+                                               config.layer_norm_eps, config.dropout, config.type_vocab_size, **kwargs)
         else:
             self.positional_embedding = PositionalEmbedding(config.hidden_size, config.dropout, config.max_sequence_length)
-            self.src_embedding = TransformerEmbedding(config.hidden_size, config.src_vocab_size, config.src_padding_id)
-            self.tgt_embedding = TransformerEmbedding(config.hidden_size, config.tgt_vocab_size, config.tgt_padding_id)
+            self.src_embedding = TransformerEmbedding(config.hidden_size, config.src_vocab_size, config.src_padding_id, **kwargs)
+            self.tgt_embedding = TransformerEmbedding(config.hidden_size, config.tgt_vocab_size, config.tgt_padding_id, **kwargs)
         
 
     def forward(self,

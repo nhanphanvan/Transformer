@@ -7,7 +7,6 @@ from packaging import version
 class PositionalEmbedding(nn.Module):
     def __init__(self, hidden_size, dropout, max_len=1024):
         super().__init__()
-
         self.hidden_size = hidden_size
         self.dropout = nn.Dropout(dropout)
 
@@ -27,24 +26,35 @@ class PositionalEmbedding(nn.Module):
 
 
 class TransformerEmbedding(nn.Module):
-    def __init__(self, hidden_size, vocab_size, padding_id):
+    def __init__(self, hidden_size, vocab_size, padding_id, device=None, dtype=None):
         super().__init__()
+        kwargs = {'device': device, 'dtype': dtype}
         self.hidden_size = hidden_size
         self.vocab_size = vocab_size
-        self.embedding = nn.Embedding(vocab_size, hidden_size, padding_idx=padding_id)
+        self.embedding = nn.Embedding(vocab_size, hidden_size, padding_idx=padding_id, **kwargs)
 
     def forward(self, x):
         return self.embedding(x) * math.sqrt(self.hidden_size)
 
 class BertEmbedding(nn.Module):
-    def __init__(self, hidden_size, vocab_size, padding_id, max_len=1024, layer_norm_eps=1e-5, dropout=0.1, type_vocab_size=1):
+    def __init__(self, 
+                 hidden_size, 
+                 vocab_size, 
+                 padding_id, 
+                 max_len=1024, 
+                 layer_norm_eps=1e-5, 
+                 dropout=0.1, 
+                 type_vocab_size=1, 
+                 device=None, 
+                 dtype=None):
         super().__init__()
+        kwargs = {'device': device, 'dtype': dtype}
         self.hidden_size = hidden_size
         self.vocab_size = vocab_size
-        self.word_embedding = nn.Embedding(vocab_size, hidden_size, padding_idx=padding_id)
-        self.position_embedding = nn.Embedding(max_len, hidden_size)
-        self.token_type_embedding = nn.Embedding(type_vocab_size, hidden_size)
-        self.norm = nn.LayerNorm(hidden_size, eps=layer_norm_eps)
+        self.word_embedding = nn.Embedding(vocab_size, hidden_size, padding_idx=padding_id, **kwargs)
+        self.position_embedding = nn.Embedding(max_len, hidden_size, **kwargs)
+        self.token_type_embedding = nn.Embedding(type_vocab_size, hidden_size, **kwargs)
+        self.norm = nn.LayerNorm(hidden_size, eps=layer_norm_eps, **kwargs)
         self.dropout = nn.Dropout(dropout)
         self.register_buffer("position_ids", torch.arange(max_len).expand((1, -1)))
         if version.parse(torch.__version__) > version.parse("1.6.0"):

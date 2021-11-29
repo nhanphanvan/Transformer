@@ -11,14 +11,15 @@ class Transformer(nn.Module):
         self.hidden_size = config.hidden_size
         self.feedforward_size = config.feedforward_size
         self.num_attention_heads = config.num_attention_heads
-        
+        kwargs = {'device': config.device, 'dtype': config.dtype}
+
         encoder_layer = TransformerEncoderLayer(config=config)
-        encoder_norm = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps)
+        encoder_norm = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps, **kwargs)
         self.encoder = TransformerEncoder(encoder_layer=encoder_layer, 
                                           num_encoder_layers=config.num_encoder_layers, 
                                           encoder_norm=encoder_norm)
         decoder_layer = TransformerDecoderLayer(config=config)
-        decoder_norm = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps)
+        decoder_norm = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps, **kwargs)
         self.decoder = TransformerDecoder(decoder_layer=decoder_layer,
                                           num_decoder_layers=config.num_decoder_layers,
                                           decoder_norm=decoder_norm)

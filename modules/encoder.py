@@ -10,14 +10,15 @@ class TransformerEncoderLayer(nn.Module):
 
     def __init__(self, config: TransformerConfig):
         super().__init__()
+        kwargs = {'device': config.device, 'dtype': config.dtype}
         self.self_attention = SelfAttention(config)
-        self.linear1 = nn.Linear(config.hidden_size, config.feedforward_size)
-        self.linear2 = nn.Linear(config.feedforward_size, config.hidden_size)
+        self.linear1 = nn.Linear(config.hidden_size, config.feedforward_size, **kwargs)
+        self.linear2 = nn.Linear(config.feedforward_size, config.hidden_size, **kwargs)
         self.dropout = nn.Dropout(config.dropout)
         self.dropout1 = nn.Dropout(config.dropout)
         self.dropout2 = nn.Dropout(config.dropout)
-        self.norm1 = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps)
-        self.norm2 = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps)
+        self.norm1 = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps, **kwargs)
+        self.norm2 = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps, **kwargs)
         self.activation = _get_activation_function(config.activation)
         self.norm_first = config.norm_first
 

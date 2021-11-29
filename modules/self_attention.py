@@ -8,16 +8,16 @@ import math
 class SelfAttention(nn.Module):
     def __init__(self, config: TransformerConfig):
         super().__init__()
-
+        kwargs = {'device': config.device, 'dtype': config.dtype}
         self.num_attention_heads = config.num_attention_heads
         self.head_size = config.hidden_size // config.num_attention_heads
         self.all_head_size = self.num_attention_heads * self.head_size
         self.hidden_size = config.hidden_size
 
-        self.query_projection = nn.Linear(self.hidden_size, self.all_head_size)
-        self.key_projection = nn.Linear(self.hidden_size, self.all_head_size)
-        self.value_projection = nn.Linear(self.hidden_size, self.all_head_size)
-        self.weight_matrix = nn.Linear(self.hidden_size, self.all_head_size)
+        self.query_projection = nn.Linear(self.hidden_size, self.all_head_size, **kwargs)
+        self.key_projection = nn.Linear(self.hidden_size, self.all_head_size, **kwargs)
+        self.value_projection = nn.Linear(self.hidden_size, self.all_head_size, **kwargs)
+        self.weight_matrix = nn.Linear(self.hidden_size, self.all_head_size, **kwargs)
 
         self.dropout = nn.Dropout(config.dropout)
 
