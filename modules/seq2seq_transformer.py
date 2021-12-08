@@ -1,16 +1,16 @@
 # standard library improrts
+from typing import Optional
 
 # third party imports
-from typing import Optional
-import torch
 from torch import Tensor
 import torch.nn as nn
 import torch.nn.functional as F
 
 # local applicaiton imports
-from config import TransformerConfig
-from embedding import PositionalEmbedding, TransformerEmbedding, BertEmbedding
-from transformer import Transformer
+from .config import TransformerConfig
+from .embedding import PositionalEmbedding, TransformerEmbedding, BertEmbedding
+from .transformer import Transformer
+
 
 class Seq2SeqTransformer(nn.Module):
     def __init__(self, config: TransformerConfig):

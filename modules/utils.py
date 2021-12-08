@@ -1,4 +1,7 @@
+# standard library improrts
 import copy
+
+# third party imports
 from torch.nn import ModuleList
 import torch.nn.functional as F
 

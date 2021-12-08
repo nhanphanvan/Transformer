@@ -1,8 +1,12 @@
+# standard library improrts
+import math
+
+# third party imports
+from packaging import version
 import torch
 import torch.nn as nn
-import math
 from torch.autograd import Variable
-from packaging import version
+
 
 class PositionalEmbedding(nn.Module):
     def __init__(self, hidden_size, dropout, max_len=1024):
@@ -35,6 +39,7 @@ class TransformerEmbedding(nn.Module):
 
     def forward(self, x):
         return self.embedding(x) * math.sqrt(self.hidden_size)
+
 
 class BertEmbedding(nn.Module):
     def __init__(self, 

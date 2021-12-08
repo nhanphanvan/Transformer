@@ -1,9 +1,15 @@
+# standard library improrts
+import math
+from typing import Optional
+
+# third party imports
 import torch
 import torch.nn as nn
-from config import TransformerConfig
 from torch import Tensor
-from typing import Optional
-import math
+
+# local applicaiton imports
+from .config import TransformerConfig
+
 
 class SelfAttention(nn.Module):
     def __init__(self, config: TransformerConfig):

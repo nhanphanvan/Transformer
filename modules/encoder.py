@@ -1,13 +1,18 @@
+# standard library improrts
 from typing import Optional
+
+# third party imports
 from torch import Tensor
 import torch.nn as nn
 import torch.nn.functional as F
-from config import TransformerConfig
-from self_attention import SelfAttention
-from utils import _get_activation_function, _get_clones
+
+# local applicaiton imports
+from .config import TransformerConfig
+from .self_attention import SelfAttention
+from .utils import _get_activation_function, _get_clones
+
 
 class TransformerEncoderLayer(nn.Module):
-
     def __init__(self, config: TransformerConfig):
         super().__init__()
         kwargs = {'device': config.device, 'dtype': config.dtype}

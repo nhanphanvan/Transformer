@@ -1,9 +1,14 @@
+# standard library improrts
 from typing import Optional
+
+# third party imports
 from torch import Tensor
 import torch.nn as nn
-from config import TransformerConfig
-from encoder import TransformerEncoder, TransformerEncoderLayer
-from decoder import TransformerDecoder, TransformerDecoderLayer
+
+# local applicaiton imports
+from .config import TransformerConfig
+from .encoder import TransformerEncoder, TransformerEncoderLayer
+from .decoder import TransformerDecoder, TransformerDecoderLayer
 
 class Transformer(nn.Module):
     def __init__(self, config: TransformerConfig):
