@@ -17,6 +17,7 @@ class TransformerConfig:
                 max_sequence_length: int = 1024,
                 bert_embedding: bool = False,
                 type_vocab_size: int = 1,
+                output_hidden_states: bool = False,
                 device=None,
                 dtype=None) -> None:
 
@@ -36,5 +37,6 @@ class TransformerConfig:
         self.max_sequence_length = max_sequence_length
         self.bert_embedding = bert_embedding
         self.type_vocab_size = type_vocab_size
+        self.output_hidden_states = output_hidden_states
         self.device = device
         self.dtype = dtype

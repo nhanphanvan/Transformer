@@ -1,5 +1,6 @@
 # standard library improrts
 from typing import Optional
+import collections
 
 # third party imports
 from torch import Tensor
@@ -17,6 +18,7 @@ class Seq2SeqTransformer(nn.Module):
         super().__init__()
         kwargs = {'device': config.device, 'dtype': config.dtype}
         self.bert_embedding = config.bert_embedding
+        self.output_hidden_states = config.output_hidden_states
         self.transformer = Transformer(config=config)
         self.generator = nn.Linear(config.hidden_size, config.tgt_vocab_size, **kwargs)
         if self.bert_embedding:
@@ -58,8 +60,11 @@ class Seq2SeqTransformer(nn.Module):
             src_emb = self.positional_embedding(self.src_embedding(src))
             tgt_emb = self.positional_embedding(self.tgt_embedding(tgt))
         outputs = self.transformer(src_emb, tgt_emb, src_mask, tgt_mask, memory_mask, src_key_padding_mask, tgt_key_padding_mask, memory_key_padding_mask)
-        
-        return self.generator(outputs)
+        if self.output_hidden_states:
+            Seq2SeqTransformerOutput = collections.namedtuple('Seq2SeqTransformerOutput',
+                                                             ['output', 'encoder_hidden_states', 'decoder_hidden_states'])
+            return Seq2SeqTransformerOutput(self.generator(outputs[0]), outputs[1], outputs[2])
+        return self.generator(outputs[0])
 
     def encode(self, 
                src: Tensor, 
@@ -70,7 +75,7 @@ class Seq2SeqTransformer(nn.Module):
             src_emb = self.src_embedding(src)
         else:
             src_emb = self.positional_embedding(self.src_embedding(src))
-        return self.transformer.encoder(src_emb, src_mask=src_mask, src_key_padding_mask=src_key_padding_mask)
+        return self.transformer.encoder(src_emb, src_mask=src_mask, src_key_padding_mask=src_key_padding_mask)[0]
 
     def decode(self,
               tgt: Tensor,
@@ -84,5 +89,5 @@ class Seq2SeqTransformer(nn.Module):
             tgt_emb = self.tgt_embedding(tgt)
         else:
             tgt_emb = self.positional_embedding(self.tgt_embedding(tgt))
-        return self.transformer.decoder(tgt_emb, memory, tgt_mask, memory_mask, tgt_key_padding_mask, memory_key_padding_mask)
+        return self.transformer.decoder(tgt_emb, memory, tgt_mask, memory_mask, tgt_key_padding_mask, memory_key_padding_mask)[0]
 

@@ -92,11 +92,12 @@ class TransformerDecoderLayer(nn.Module):
 
 
 class TransformerDecoder(nn.Module):
-    def __init__(self, decoder_layer, num_decoder_layers, decoder_norm=None):
+    def __init__(self, decoder_layer, num_decoder_layers, decoder_norm=None, output_hidden_states=False):
         super().__init__()
         self.layers = _get_clones(decoder_layer, num_decoder_layers)
         self.num_decoder_layer = num_decoder_layers
         self.decoder_norm = decoder_norm
+        self.output_hidden_states = output_hidden_states
 
     def forward(self,
                 tgt: Tensor,
@@ -118,6 +119,7 @@ class TransformerDecoder(nn.Module):
             memory_key_padding_mask: (N, S)
         """
         x = tgt
+        hidden_states = (x,) if self.output_hidden_states else None 
         for layer in self.layers:
             x = layer(x, 
                       memory, 
@@ -125,8 +127,12 @@ class TransformerDecoder(nn.Module):
                       memory_mask=memory_mask,
                       tgt_key_padding_mask=tgt_key_padding_mask,
                       memory_key_padding_mask=memory_key_padding_mask)
+            if self.output_hidden_states:
+                hidden_states += (x,)
         
         if self.decoder_norm is not None:
             x = self.decoder_norm(x)
+        if self.output_hidden_states:
+            hidden_states += (x,)
 
-        return x
+        return tuple(element for element in [x, hidden_states] if element is not None)

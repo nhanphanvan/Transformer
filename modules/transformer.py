@@ -1,5 +1,6 @@
 # standard library improrts
 from typing import Optional
+import collections
 
 # third party imports
 from torch import Tensor
@@ -16,18 +17,21 @@ class Transformer(nn.Module):
         self.hidden_size = config.hidden_size
         self.feedforward_size = config.feedforward_size
         self.num_attention_heads = config.num_attention_heads
+        self.output_hidden_states = config.output_hidden_states
         kwargs = {'device': config.device, 'dtype': config.dtype}
 
         encoder_layer = TransformerEncoderLayer(config=config)
         encoder_norm = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps, **kwargs)
         self.encoder = TransformerEncoder(encoder_layer=encoder_layer, 
                                           num_encoder_layers=config.num_encoder_layers, 
-                                          encoder_norm=encoder_norm)
+                                          encoder_norm=encoder_norm, 
+                                          output_hidden_states=config.output_hidden_states)
         decoder_layer = TransformerDecoderLayer(config=config)
         decoder_norm = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps, **kwargs)
         self.decoder = TransformerDecoder(decoder_layer=decoder_layer,
                                           num_decoder_layers=config.num_decoder_layers,
-                                          decoder_norm=decoder_norm)
+                                          decoder_norm=decoder_norm,
+                                          output_hidden_states=config.output_hidden_states)
         self._reset_parameters()
         
     def forward(self, 
@@ -56,14 +60,20 @@ class Transformer(nn.Module):
         if src.shape[-1] != tgt.shape[-1]:
             raise RuntimeError('The hidden size of src and tgt must be equal')
 
-        memory = self.encoder(src, src_mask=src_mask, src_key_padding_mask=src_key_padding_mask)
-        output = self.decoder(tgt, 
+        encoder_outputs = self.encoder(src, src_mask=src_mask, src_key_padding_mask=src_key_padding_mask)
+        memory = encoder_outputs[0]
+        decoder_outputs = self.decoder(tgt, 
                               memory=memory,
                               tgt_mask=tgt_mask,
                               memory_mask=memory_mask,
                               tgt_key_padding_mask=tgt_key_padding_mask,
                               memory_key_padding_mask=memory_key_padding_mask)
-        return output
+        output = decoder_outputs[0]
+        if self.output_hidden_states:
+            TransformerOutput = collections.namedtuple('TransformerOutput',
+                                                      ['output', 'encoder_hidden_states', 'decoder_hidden_states'])
+            return TransformerOutput(output, encoder_outputs[1], decoder_outputs[1])
+        return output,
 
     def _reset_parameters(self):
         for p in self.parameters():
