@@ -75,7 +75,7 @@ class SelfAttention(nn.Module):
 
         assert hidden_size == self.hidden_size, f'Expecting hidden_size is {self.hidden_size}, but got {hidden_size}'
 
-        q, k, v = self._project(query, key, value)
+        query, key, value = self._project(query, key, value)
 
         if attention_mask is not None:
             assert attention_mask.dtype == torch.bool or attention_mask.dtype == torch.int, f'Only bool and int are supported for attention_mask, not {attention_mask.dtype}'
@@ -105,9 +105,9 @@ class SelfAttention(nn.Module):
                 key_padding_mask = key_padding_mask.to(torch.bool)
 
         # change shape to (batch_size, number_of_heads, sequence_length, emb_size)
-        q = self._change_for_multihead_shape(q)
-        k = self._change_for_multihead_shape(k)
-        v = self._change_for_multihead_shape(v)
+        query = self._change_for_multihead_shape(query)
+        key = self._change_for_multihead_shape(key)
+        value = self._change_for_multihead_shape(value)
         
         # merge key padding mask and attention mask
         if key_padding_mask is not None:
@@ -122,7 +122,7 @@ class SelfAttention(nn.Module):
             new_attention_mask = new_attention_mask.masked_fill(attention_mask, float('-inf'))
             attention_mask = new_attention_mask
         
-        attention_output = self._dot_product_attention(q, k, v, attention_mask)
+        attention_output = self._dot_product_attention(query, key, value, attention_mask)
         attention_output = attention_output.transpose(1, 2).contiguous().view(batch_size, tgt_length, hidden_size)
         attention_output = self.weight_matrix(attention_output)
 

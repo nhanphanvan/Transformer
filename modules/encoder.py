@@ -63,15 +63,14 @@ class TransformerEncoderLayer(nn.Module):
             tgt_key_padding_mask: (N, T)
             memory_key_padding_mask: (N, S)
         """        
-        x = src
         if self.norm_first:
-            x = x + self._self_attention_block(self.norm1(x), src_mask, src_key_padding_mask)
-            x = x + self._feedforward_block(self.norm2(x))
+            src = src + self._self_attention_block(self.norm1(src), src_mask, src_key_padding_mask)
+            src = src + self._feedforward_block(self.norm2(src))
         else:
-            x = self.norm1(x + self._self_attention_block(x, src_mask, src_key_padding_mask))
-            x = self.norm2(x + self._feedforward_block(x))
+            src = self.norm1(src + self._self_attention_block(src, src_mask, src_key_padding_mask))
+            src = self.norm2(src + self._feedforward_block(src))
 
-        return x
+        return src
 
 
 class TransformerEncoder(nn.Module):
@@ -98,19 +97,18 @@ class TransformerEncoder(nn.Module):
             tgt_key_padding_mask: (N, T)
             memory_key_padding_mask: (N, S)
         """
-        x = src
-        hidden_states = (x,) if self.output_hidden_states else None 
+        hidden_states = (src,) if self.output_hidden_states else None 
         for layer in self.layers:
-            x = layer(x,
+            src = layer(src,
                       src_mask=src_mask,
                       src_key_padding_mask=src_key_padding_mask)
             if self.output_hidden_states:
-                hidden_states += (x,)        
+                hidden_states += (src,)        
 
         if self.encoder_norm is not None:
-            x = self.encoder_norm(x)
+            src = self.encoder_norm(src)
         if self.output_hidden_states:
-            hidden_states += (x,)
+            hidden_states += (src,)
 
-        return tuple(element for element in [x, hidden_states] if element is not None)
+        return tuple(element for element in [src, hidden_states] if element is not None)
         

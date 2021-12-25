@@ -78,17 +78,16 @@ class TransformerDecoderLayer(nn.Module):
             tgt_key_padding_mask: (N, T)
             memory_key_padding_mask: (N, S)
         """
-        x = tgt
         if self.norm_first:
-            x = x + self._self_attention_block(self.norm1(x), tgt_mask, tgt_key_padding_mask)
-            x = x + self._cross_attention_block(self.norm2(x), memory, memory_mask, memory_key_padding_mask)
-            x = x + self._feedforward_block(self.norm3(x))
+            tgt = tgt + self._self_attention_block(self.norm1(tgt), tgt_mask, tgt_key_padding_mask)
+            tgt = tgt + self._cross_attention_block(self.norm2(tgt), memory, memory_mask, memory_key_padding_mask)
+            tgt = tgt + self._feedforward_block(self.norm3(tgt))
         else:
-            x = self.norm1(x + self._self_attention_block(x, tgt_mask, tgt_key_padding_mask))
-            x = self.norm2(x + self._cross_attention_block(x, memory, memory_mask, memory_key_padding_mask))
-            x = self.norm3(x + self._feedforward_block(x))
+            tgt = self.norm1(tgt + self._self_attention_block(tgt, tgt_mask, tgt_key_padding_mask))
+            tgt = self.norm2(tgt + self._cross_attention_block(tgt, memory, memory_mask, memory_key_padding_mask))
+            tgt = self.norm3(tgt + self._feedforward_block(tgt))
 
-        return x
+        return tgt
 
 
 class TransformerDecoder(nn.Module):
@@ -118,21 +117,20 @@ class TransformerDecoder(nn.Module):
             tgt_key_padding_mask: (N, T)
             memory_key_padding_mask: (N, S)
         """
-        x = tgt
-        hidden_states = (x,) if self.output_hidden_states else None 
+        hidden_states = (tgt,) if self.output_hidden_states else None 
         for layer in self.layers:
-            x = layer(x, 
+            tgt = layer(tgt, 
                       memory, 
                       tgt_mask=tgt_mask, 
                       memory_mask=memory_mask,
                       tgt_key_padding_mask=tgt_key_padding_mask,
                       memory_key_padding_mask=memory_key_padding_mask)
             if self.output_hidden_states:
-                hidden_states += (x,)
+                hidden_states += (tgt,)
         
         if self.decoder_norm is not None:
-            x = self.decoder_norm(x)
+            tgt = self.decoder_norm(tgt)
         if self.output_hidden_states:
-            hidden_states += (x,)
+            hidden_states += (tgt,)
 
-        return tuple(element for element in [x, hidden_states] if element is not None)
+        return tuple(element for element in [tgt, hidden_states] if element is not None)
