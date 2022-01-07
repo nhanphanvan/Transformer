@@ -19,6 +19,7 @@ class Seq2SeqTransformer(nn.Module):
         kwargs = {'device': config.device, 'dtype': config.dtype}
         self.bert_embedding = config.bert_embedding
         self.output_hidden_states = config.output_hidden_states
+        self.apply_layer_norm = config.apply_layer_norm
         self.transformer = Transformer(config=config)
         self.generator = nn.Linear(config.hidden_size, config.tgt_vocab_size, **kwargs)
         if self.bert_embedding:

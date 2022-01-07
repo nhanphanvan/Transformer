@@ -91,12 +91,14 @@ class TransformerDecoderLayer(nn.Module):
 
 
 class TransformerDecoder(nn.Module):
-    def __init__(self, decoder_layer, num_decoder_layers, decoder_norm=None, output_hidden_states=False):
+    def __init__(self, decoder_layer, num_decoder_layers,
+                 decoder_norm=None, output_hidden_states=False, apply_layer_norm=False):
         super().__init__()
         self.layers = _get_clones(decoder_layer, num_decoder_layers)
         self.num_decoder_layer = num_decoder_layers
         self.decoder_norm = decoder_norm
         self.output_hidden_states = output_hidden_states
+        self.apply_layer_norm = apply_layer_norm
 
     def forward(self,
                 tgt: Tensor,
@@ -126,7 +128,7 @@ class TransformerDecoder(nn.Module):
                       tgt_key_padding_mask=tgt_key_padding_mask,
                       memory_key_padding_mask=memory_key_padding_mask)
             if self.output_hidden_states:
-                hidden_states += (tgt,)
+                hidden_states += (self.decoder_norm(tgt),) if self.apply_layer_norm and self.decoder_norm is not None else (tgt,)
         
         if self.decoder_norm is not None:
             tgt = self.decoder_norm(tgt)

@@ -18,6 +18,7 @@ class Transformer(nn.Module):
         self.feedforward_size = config.feedforward_size
         self.num_attention_heads = config.num_attention_heads
         self.output_hidden_states = config.output_hidden_states
+        self.apply_layer_norm = config.apply_layer_norm
         kwargs = {'device': config.device, 'dtype': config.dtype}
 
         encoder_layer = TransformerEncoderLayer(config=config)
@@ -25,13 +26,15 @@ class Transformer(nn.Module):
         self.encoder = TransformerEncoder(encoder_layer=encoder_layer, 
                                           num_encoder_layers=config.num_encoder_layers, 
                                           encoder_norm=encoder_norm, 
-                                          output_hidden_states=config.output_hidden_states)
+                                          output_hidden_states=config.output_hidden_states,
+                                          apply_layer_norm=config.apply_layer_norm)
         decoder_layer = TransformerDecoderLayer(config=config)
         decoder_norm = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps, **kwargs)
         self.decoder = TransformerDecoder(decoder_layer=decoder_layer,
                                           num_decoder_layers=config.num_decoder_layers,
                                           decoder_norm=decoder_norm,
-                                          output_hidden_states=config.output_hidden_states)
+                                          output_hidden_states=config.output_hidden_states,
+                                          apply_layer_norm=config.apply_layer_norm)
         self._reset_parameters()
         
     def forward(self, 

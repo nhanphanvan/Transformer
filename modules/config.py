@@ -18,6 +18,7 @@ class TransformerConfig:
                 bert_embedding: bool = False,
                 type_vocab_size: int = 1,
                 output_hidden_states: bool = False,
+                apply_layer_norm: bool = False,
                 device=None,
                 dtype=None) -> None:
 
@@ -38,5 +39,6 @@ class TransformerConfig:
         self.bert_embedding = bert_embedding
         self.type_vocab_size = type_vocab_size
         self.output_hidden_states = output_hidden_states
+        self.apply_layer_norm = apply_layer_norm
         self.device = device
         self.dtype = dtype
