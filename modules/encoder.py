@@ -13,6 +13,11 @@ from .utils import _get_activation_function, _get_clones
 
 
 class TransformerEncoderLayer(nn.Module):
+    r"""
+    Args:
+        config:
+            an instance of TransformerConfig class.
+    """
     def __init__(self, config: TransformerConfig):
         super().__init__()
         kwargs = {'device': config.device, 'dtype': config.dtype}
@@ -53,16 +58,14 @@ class TransformerEncoderLayer(nn.Module):
                 src_key_padding_mask: Optional[Tensor] = None) -> Tensor:
         """
             N: batch size, S: source sequence length, T: target sequence length, E: feature number
-            src: (N, S, E)
-            tgt : (N, T, E)
-            memory: (N, S, E)
-            src_mask: (S, S)
-            tgt_mask: (T, T)
-            memory_mask: (T, S)
-            src_key_padding_mask: (N, S)
-            tgt_key_padding_mask: (N, T)
-            memory_key_padding_mask: (N, S)
-        """        
+            Args:
+            src:
+                the sequence to the encoder. Have shape (N, S, E).
+            src_mask (*optional*):
+                the additive mask for the src sequence. Have shape (S, S).
+            src_key_padding_mask (*optional*):
+                the mask for src keys per batch. Have shape (N, S).
+        """       
         if self.norm_first:
             src = src + self._self_attention_block(self.norm1(src), src_mask, src_key_padding_mask)
             src = src + self._feedforward_block(self.norm2(src))
@@ -74,6 +77,21 @@ class TransformerEncoderLayer(nn.Module):
 
 
 class TransformerEncoder(nn.Module):
+    r"""
+    Args:
+        encoder_layer:
+            an instance of TransformerEncoderLayer class.
+        num_encoder_layers:
+            The number of sub-encoder in encoder block.
+        encoder_norm (*Optional*):
+            the layer normalization component.
+        output_hidden_states (`bool`, *optional*, default = False):
+            If `True`, return the hidden states of all layers in encoder and decoder.
+        apply_layer_norm (`bool`, *optional*, default = False):
+            Use if `output_hidden_state` = `True`. If `True`, apply LayerNorm for all
+            hidden states.
+    """
+
     def __init__(self, encoder_layer, num_encoder_layers,
                  encoder_norm=None, output_hidden_states=False, apply_layer_norm=False):
         super().__init__()
@@ -89,15 +107,13 @@ class TransformerEncoder(nn.Module):
                 src_key_padding_mask: Optional[Tensor] = None) -> Tensor:
         """
             N: batch size, S: source sequence length, T: target sequence length, E: feature number
-            src: (N, S, E)
-            tgt : (N, T, E)
-            memory: (N, S, E)
-            src_mask: (S, S)
-            tgt_mask: (T, T)
-            memory_mask: (T, S)
-            src_key_padding_mask: (N, S)
-            tgt_key_padding_mask: (N, T)
-            memory_key_padding_mask: (N, S)
+            Args:
+            src:
+                the sequence to the encoder. Have shape (N, S, E).
+            src_mask (*optional*):
+                the additive mask for the src sequence. Have shape (S, S).
+            src_key_padding_mask (*optional*):
+                the mask for src keys per batch. Have shape (N, S).
         """
         hidden_states = (src,) if self.output_hidden_states else None 
         for layer in self.layers:

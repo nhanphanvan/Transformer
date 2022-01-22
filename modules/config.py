@@ -1,5 +1,56 @@
 
 class TransformerConfig:
+    r"""
+    This is the configuration class to store the configuration of the Transformer Model and
+    Seq2SeqTransformer . It is used to instantiate a Transformer model according to the
+    specified arguments.
+
+    Args:
+        src_vocab_size (`int`, *optional*, default = 30522):
+            Vocabulary size of source language. Use for Seq2SeqTransformer model.
+        tgt_vocab_size (`int`, *optional*, default = 30522):
+            Vocabulary size of target language. Use for Seq2SeqTransformer model.
+        hidden_size (`int`, *optional*, default = 768):
+            The number of expected features in the encoder or decoder. Use for both models.
+        num_encoder_layers (`int`, *optional*, default = 12):
+            The number of sub-encoder in encoder block. Use for both models.
+        num_decoder_layers ('`int`, *optional*, default = 12):
+            The number of sub-decoder in decoder block. Use for both models.
+        num_attention_heads (`int`, *optional*, default = 12):
+            The number of heads in the multihead attention. Use for both models.
+        feedforward_size (`int`, *optional*, default = 2048):
+            The dimension of the feedforward network model. Use for both models.
+        dropout (`float`, *optional*, default = 0.1):
+            The dropout value. Use for both models.
+        activation (`str`, *optional*, default = 'relu'):
+            The activation function. Can be ("relu" or "gelu"). Use for both models.
+        layer_norm_eps (`float`, *optional*, default = 1e-5) :
+            The eps value in layer normalization components. Use for both models.
+        src_padding_id (`int`, *optional*, default = 1):
+            The index of padding token in source vocabulary. Use for batch training.
+            User for both models.
+        tgt_padding_id (`int`, *optional*, default = 1):
+            The index of padding token in target vocabulary. Use for batch training.
+            Use for both models.
+        norm_first (`bool`, *optional*, default = False):
+            If `True`, encoder and decoder layer will perform LayerNorm before.
+            Use for both models.
+        max_sequence_length (`int`, *optional*, default = 1024):
+            Maximum number of tokens in one sentence. Use for declare positional embedding.
+            Use for Seq2SeqTransformer model.
+        bert_embedding (`bool`, *optional*, default = False):
+            if `True`, Embedding layer will use Bert Embedding, else Transformer Embedding.
+            Use for Seq2SeqTransformer model.
+        type_vocab_size (`int`, *optional*, default = 1):
+            Use in Bert Embedding. The vocabulary size of the `token_type_ids`.
+            Use for Seq2SeqTransformer model.
+        output_hidden_states (`bool`, *optional*, default = False):
+            If `True`, return the hidden states of all layers in encoder and decoder.
+            Use for both models.
+        apply_layer_norm (`bool`, *optional*, default = False):
+            Use if `output_hidden_state` = `True`. If `True`, apply LayerNorm for all
+            hidden states. Use for both models.
+    """
     def __init__(self,
                 src_vocab_size: int = 30522, 
                 tgt_vocab_size: int = 30522, 

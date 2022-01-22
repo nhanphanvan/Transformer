@@ -68,15 +68,19 @@ class TransformerDecoderLayer(nn.Module):
                 memory_key_padding_mask: Optional[Tensor] = None) -> Tensor:
         """
             N: batch size, S: source sequence length, T: target sequence length, E: feature number
-            src: (N, S, E)
-            tgt : (N, T, E)
-            memory: (N, S, E)
-            src_mask: (S, S)
-            tgt_mask: (T, T)
-            memory_mask: (T, S)
-            src_key_padding_mask: (N, S)
-            tgt_key_padding_mask: (N, T)
-            memory_key_padding_mask: (N, S)
+            Args:
+            tgt:
+                the sequence to the decoder. Have shape (N, T, E).
+            memory:
+                the sequence from the last layer of the encoder. Have shape (N, S, E).
+            tgt_mask (*optional*):
+                the additive mask for the tgt sequence. Have shape (T, T).
+            memory_mask (*optional*):
+                the additive mask for the encoder output. Have shape (T, S).
+            tgt_key_padding_mask (*optional*):
+                the mask for tgt keys per batch. Have shape (N, T).
+            memory_key_padding_mask (*optional*):
+                the mask for memory keys per batch. Have shape (N, S).
         """
         if self.norm_first:
             tgt = tgt + self._self_attention_block(self.norm1(tgt), tgt_mask, tgt_key_padding_mask)
@@ -91,6 +95,21 @@ class TransformerDecoderLayer(nn.Module):
 
 
 class TransformerDecoder(nn.Module):
+    r"""
+    Args:
+        decoder_layer:
+            an instance of TransformerDecoderLayer class.
+        num_decoder_layers:
+            The number of sub-decoder in decoder block.
+        decoder_norm (*Optional*):
+            the layer normalization component.
+        output_hidden_states (`bool`, *optional*, default = False):
+            If `True`, return the hidden states of all layers in encoder and decoder.
+        apply_layer_norm (`bool`, *optional*, default = False):
+            Use if `output_hidden_state` = `True`. If `True`, apply LayerNorm for all
+            hidden states.
+    """
+
     def __init__(self, decoder_layer, num_decoder_layers,
                  decoder_norm=None, output_hidden_states=False, apply_layer_norm=False):
         super().__init__()
@@ -109,15 +128,19 @@ class TransformerDecoder(nn.Module):
                 memory_key_padding_mask: Optional[Tensor] = None) -> Tensor:
         """
             N: batch size, S: source sequence length, T: target sequence length, E: feature number
-            src: (N, S, E)
-            tgt : (N, T, E)
-            memory: (N, S, E)
-            src_mask: (S, S)
-            tgt_mask: (T, T)
-            memory_mask: (T, S)
-            src_key_padding_mask: (N, S)
-            tgt_key_padding_mask: (N, T)
-            memory_key_padding_mask: (N, S)
+            Args:
+            tgt:
+                the sequence to the decoder. Have shape (N, T, E).
+            memory:
+                the sequence from the last layer of the encoder. Have shape (N, S, E).
+            tgt_mask (*optional*):
+                the additive mask for the tgt sequence. Have shape (T, T).
+            memory_mask (*optional*):
+                the additive mask for the encoder output. Have shape (T, S).
+            tgt_key_padding_mask (*optional*):
+                the mask for tgt keys per batch. Have shape (N, T).
+            memory_key_padding_mask (*optional*):
+                the mask for memory keys per batch. Have shape (N, S).
         """
         hidden_states = (tgt,) if self.output_hidden_states else None 
         for layer in self.layers:
