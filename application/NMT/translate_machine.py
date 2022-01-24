@@ -9,8 +9,6 @@ class TranslateMachine:
   def __init__(self, model: NMTModel,
                data_store: Datastore,
                look_up_array: np.array,
-               start_symbol: str, 
-               end_symbol: str,
                gamma: float = 0.2,
                temperature: int = 10,
                use_layernorm: bool = True,
@@ -24,8 +22,6 @@ class TranslateMachine:
     self.gamma = gamma
     self.temperature = temperature
     self.use_layernorm = use_layernorm
-    self.start_symbol = start_symbol
-    self.end_symbol = end_symbol
     self.device = device
 
   def apply_data_store(self, encoder_embeddings, num_knns):
@@ -67,7 +63,7 @@ class TranslateMachine:
     src_mask = src_mask.to(self.device)
     memory = self.model.transformer_model.encode(src, src_mask)
     batch_size, src_length, hidden_size = memory.shape
-    tgt = torch.LongTensor([[self.start_symbol]]).to(self.device)
+    tgt = torch.LongTensor([[self.model.tgt_bos_id]]).to(self.device)
     tgt_mask = self._generate_square_subsequent_mask(tgt.size(1)).type(torch.bool)
     outputs = self.model.transformer_model.decode(tgt, memory, tgt_mask)
 
@@ -82,7 +78,7 @@ class TranslateMachine:
 
     log_scores, index = torch.log(final_distribution).topk(num_beams)
     outputs = torch.zeros((num_beams, max_len), dtype=torch.int32, device=self.device)
-    outputs[:, 0] = self.start_symbol
+    outputs[:, 0] = self.model.tgt_bos_id
     outputs[:, 1] = index[0]
     memory = memory.expand(num_beams, src_length, hidden_size)
 
@@ -126,7 +122,7 @@ class TranslateMachine:
       final_distribution = self.gamma*knn_distribution + (1 - self.gamma)*mt_distribution
 
       outputs, log_scores = self._choose_topk(outputs, final_distribution, log_scores, i, num_beams)
-      finished_sentences = (outputs == self.end_symbol).nonzero()
+      finished_sentences = (outputs == self.model.tgt_eos_id).nonzero()
       mark_eos = torch.zeros(num_beams, dtype=torch.int64, device=self.device)
       num_finished_sentences = 0
       for eos_symbol in finished_sentences:
@@ -142,7 +138,7 @@ class TranslateMachine:
         chosen_sentence_index = chosen_sentence_index[0]
         break
     
-    sentence_length = (outputs[chosen_sentence_index] == self.end_symbol).nonzero()
+    sentence_length = (outputs[chosen_sentence_index] == self.model.tgt_eos_id).nonzero()
     sentence_length = sentence_length[0] if len(sentence_length) > 0 else -1
     return outputs[chosen_sentence_index][:sentence_length+1]
   
