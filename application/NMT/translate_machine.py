@@ -50,7 +50,7 @@ class TranslateMachine:
     mask = (torch.triu(torch.ones((sz, sz), device=self.device)) == 0).transpose(0, 1)
     return mask
 
-  def _init_beam_search(self, src, src_mask, max_len, num_beams, num_knns):
+  def _init_beam_search(self, src, src_mask, max_len, num_beams, num_knns, use_datastore):
     """
     init first beam search with BOS symbol and calculate topk candidates
     :param model:
@@ -72,12 +72,14 @@ class TranslateMachine:
 
     # outputs.shape = (N,S,E) -> outputs[:, -1] take (N,E) at last element in axis=1 -> apply data_store
     encoder_embeddings = outputs[:, -1]
-    knn_distribution = self.apply_data_store(encoder_embeddings, num_knns)
-
-    # apply distribution of datastore and get final distribution
     outputs = self.model.transformer_model.generator(encoder_embeddings)
-    mt_distribution = F.softmax(outputs, dim=-1)
-    final_distribution = self.gamma*knn_distribution + (1 - self.gamma)*mt_distribution
+    if use_datastore:
+      knn_distribution = self.apply_data_store(encoder_embeddings, num_knns)
+      # apply distribution of datastore and get final distribution
+      mt_distribution = F.softmax(outputs, dim=-1)
+      final_distribution = self.gamma*knn_distribution + (1 - self.gamma)*mt_distribution
+    else:
+      final_distribution = F.softmax(outputs, dim=-1)
 
     log_scores, index = torch.log(final_distribution).topk(num_beams)
     outputs = torch.zeros((num_beams, max_len), dtype=torch.int32, device=self.device)
@@ -108,21 +110,23 @@ class TranslateMachine:
 
     return outputs, log_scores
 
-  def beam_search(self, src, src_mask, max_len, num_beams, num_knns):
+  def beam_search(self, src, src_mask, max_len, num_beams, num_knns, use_datastore=True):
     max_len = 256 if max_len > 256 else max_len
     chosen_sentence_index = 0
-    outputs, memory, log_scores = self._init_beam_search(src, src_mask, max_len, num_beams, num_knns)
+    outputs, memory, log_scores = self._init_beam_search(src, src_mask, max_len, num_beams, num_knns, use_datastore)
     for i in range(2, max_len):
       tgt_mask = self._generate_square_subsequent_mask(outputs[:, :i].size(1)).type(torch.bool)
       encoder_embeddings = self.model.transformer_model.decode(outputs[:, :i], memory, tgt_mask[:i, :i])
 
       # encoder_embeddings.shape = (N,S,E) -> encoder_embeddings[:, -1] take (N,E) at last element in axis=1 -> apply data_store
       encoder_embeddings = encoder_embeddings[:, -1]
-      knn_distribution = self.apply_data_store(encoder_embeddings, num_knns)
-
       prob = self.model.transformer_model.generator(encoder_embeddings)
-      mt_distribution = F.softmax(prob, dim=-1)
-      final_distribution = self.gamma*knn_distribution + (1 - self.gamma)*mt_distribution
+      if use_datastore:
+        knn_distribution = self.apply_data_store(encoder_embeddings, num_knns)
+        mt_distribution = F.softmax(prob, dim=-1)
+        final_distribution = self.gamma*knn_distribution + (1 - self.gamma)*mt_distribution
+      else:
+        final_distribution = F.softmax(prob, dim=-1)
 
       outputs, log_scores = self._choose_topk(outputs, final_distribution, log_scores, i, num_beams)
       finished_sentences = (outputs == self.model.tgt_eos_id).nonzero()
@@ -145,7 +149,9 @@ class TranslateMachine:
     sentence_length = sentence_length[0] if len(sentence_length) > 0 else -1
     return outputs[chosen_sentence_index][:sentence_length+1]
   
-  def beam_translate(self, src_sentence: str, num_beams: int = 10, num_knns: int = 10, num_token_factor: float = 2.0):
+  def beam_translate(self, src_sentence: str, num_beams: int = 10, 
+                     use_datastore: bool = True, num_knns: int = 10, 
+                     num_token_factor: float = 2.0):
     self.model.transformer_model.eval()
     with torch.no_grad():
       src_encodings = self.model.src_tokenizer.batch_encode_plus([src_sentence], padding=True)
