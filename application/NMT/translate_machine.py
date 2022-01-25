@@ -12,7 +12,7 @@ class TranslateMachine:
                gamma: float = 0.2,
                temperature: int = 10,
                use_layernorm: bool = True,
-               device: str = 'cpu'):
+               device: torch.device = None):
     
     if not 0 <= gamma <= 1:
       raise ValueError(f'gamma must be between 0 and 1')
@@ -22,7 +22,10 @@ class TranslateMachine:
     self.gamma = gamma
     self.temperature = temperature
     self.use_layernorm = use_layernorm
-    self.device = device
+    if device is None:
+      self.device = torch.device('cpu')
+    else:
+      self.device = device
 
   def apply_data_store(self, encoder_embeddings, num_knns):
     queries = encoder_embeddings.cpu().detach().numpy()

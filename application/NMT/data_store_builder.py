@@ -8,9 +8,12 @@ from .translate_machine_model import NMTModel
 from .utils import CustomDataset
 
 class DatastoreBuilder:
-    def __init__(self, model: NMTModel, device: str = 'cpu'):
+    def __init__(self, model: NMTModel, device: torch.device = None):
         self.model = model
-        self.device = device
+        if device is None:
+            self.device = torch.device('cpu')
+        else:
+            self.device = device
 
     def generate_square_subsequent_mask(self, sz):
         mask = (torch.triu(torch.ones((sz, sz), device=self.device)) == 0).transpose(0, 1)
