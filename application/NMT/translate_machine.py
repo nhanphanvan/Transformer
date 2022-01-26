@@ -159,5 +159,5 @@ class TranslateMachine:
       num_tokens = src_ids.shape[1]
       src_mask = (torch.zeros(num_tokens, num_tokens)).type(torch.bool)
       max_len = int(num_tokens*num_token_factor+5)
-      tgt_tokens = self.beam_search(src_ids, src_mask, max_len=max_len, num_beams=num_beams, num_knns=num_knns).flatten()
+      tgt_tokens = self.beam_search(src_ids, src_mask, max_len=max_len, num_beams=num_beams, num_knns=num_knns, use_datastore=use_datastore).flatten()
       return self.convert_ids_to_string(self.model.tgt_tokenizer, tgt_tokens.tolist())
