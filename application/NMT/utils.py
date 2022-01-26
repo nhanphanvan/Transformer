@@ -3,7 +3,7 @@ from tqdm import tqdm
 from torch.utils.data import Dataset
 from torchtext.data.metrics import bleu_score
 
-from .translate_machine_model import NMTModel
+from .translate_machine import TranslateMachine
 
 class CustomDataset(Dataset):
     r"""
@@ -44,7 +44,7 @@ class CustomDataset(Dataset):
         return sentence
 
 
-def calculate_bleu_score(translate_machine: NMTModel,
+def calculate_bleu_score(translate_machine: TranslateMachine,
                          src_path: str,
                          tgt_path: str,
                          end_index: int = None,
