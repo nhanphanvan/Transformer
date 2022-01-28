@@ -53,6 +53,8 @@ def calculate_bleu_score(translate_machine: TranslateMachine,
                          gamma: float = 0.3,
                          temperature: int = 10, 
                          use_layernorm: bool = True,
+                         use_datastore: bool = True,
+                         num_token_factor: float = 1.5,
                          return_sentence: bool = False):
   
   if not 0 <= gamma <= 1:
@@ -64,7 +66,7 @@ def calculate_bleu_score(translate_machine: TranslateMachine,
   translate_machine.temperature = temperature
   translate_machine.use_layernorm = use_layernorm
   for src, tgt in tqdm(data_iter[:end_index], desc='Blue score'):
-    pred_tgt = translate_machine.beam_translate(src, num_beams=num_beams, num_knns=num_knns)
+    pred_tgt = translate_machine.beam_translate(src, num_beams=num_beams, num_knns=num_knns, use_datastore=use_datastore, num_token_factor=num_token_factor)
     pred_sents.append(pred_tgt)
     tgt_sents.append(tgt)
   

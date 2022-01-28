@@ -151,7 +151,7 @@ class TranslateMachine:
   
   def beam_translate(self, src_sentence: str, num_beams: int = 10, 
                      use_datastore: bool = True, num_knns: int = 10, 
-                     num_token_factor: float = 2.0):
+                     num_token_factor: float = 1.5):
     self.model.transformer_model.eval()
     with torch.no_grad():
       src_encodings = self.model.src_tokenizer.batch_encode_plus([src_sentence], padding=True)
